@@ -1,7 +1,10 @@
 VERBOSE ?= FALSE
-DOCKER ?= docker
-DOCKER_CACHE ?= FALSE
-BUILD_OS ?= ubuntu22.04
+# DOCKER ?= docker
+# DOCKER_CACHE ?= FALSE
+# BUILD_OS ?= ubuntu22.04
+DOCKER ?= podman
+DOCKER_CACHE ?= TRUE
+BUILD_OS ?= rhel9.4
 BUILD_DIR ?= $(CURDIR)/dockerbuild
 
 REPO_SERVER ?= vault.habana.ai
