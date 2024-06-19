@@ -14,15 +14,10 @@ ARG BASE_NAME
 ARG ARTIFACTORY_URL
 
 LABEL name="PyTorch Installer"
-LABEL summary="Habanalabs PyTorch installer layer for RHEL9.2"
+LABEL summary="Habanalabs PyTorch installer layer for RHEL9.4"
 LABEL description="Image with pre installed Habanalabs packages for PyTorch"
 
 ENV PYTHONPATH=/root:/usr/lib/habanalabs/
-
-RUN echo "[CRB]" > /etc/yum.repos.d/CentOS-Linux-CRB.repo && \
-    echo "name=CentOS Linux 9 - CRB" >> /etc/yum.repos.d/CentOS-Linux-CRB.repo && \
-    echo "baseurl=https://mirror.stream.centos.org/9-stream/CRB/x86_64/os" >> /etc/yum.repos.d/CentOS-Linux-CRB.repo && \
-    echo "gpgcheck=0" >> /etc/yum.repos.d/CentOS-Linux-CRB.repo
 
 RUN dnf install --allowerasing -y \
     curl \
@@ -31,16 +26,17 @@ RUN dnf install --allowerasing -y \
     iproute \
     which \
     zlib-devel \
-    lapack-devel \
-    openblas-devel \
     numactl \
     gperftools-devel && \
     dnf clean all && rm -rf /var/cache/yum
 
+# MISSING: lapack-devel openblas-devel
+
 RUN dnf config-manager --add-repo https://yum.repos.intel.com/mkl/setup/intel-mkl.repo -y && \
-    dnf install --allowerasing -y intel-mkl-2020.4-912 && \
+    dnf install --allowerasing -y intel-mkl-64bit-2020.4-912 && \
     dnf clean all && rm -rf /var/cache/yum
 
+ENV PYTHON_VERSION=3.10
 COPY install_packages.sh .
 
 RUN ./install_packages.sh && rm -f install_packages.sh && \
