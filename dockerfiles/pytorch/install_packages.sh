@@ -16,7 +16,10 @@ case "${BASE_NAME}" in
     *rhel9.8*)
         OS_STRING="rhel98"
     ;;
-    *tencentos*)
+    *rhel10.2*)
+        OS_STRING="rhel102"
+    ;;
+    *tencentos3*)
         OS_STRING="tencentos31"
     ;;
     *navix9.4*)

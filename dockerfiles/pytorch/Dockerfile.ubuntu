@@ -31,7 +31,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         moreutils \
         numactl \
         pdsh && \
-    apt-get autoremove && rm -rf /var/lib/apt/lists/*
+    apt-get autoremove -y && rm -rf /var/lib/apt/lists/*
 
 RUN bash -c "\
         case $BASE_NAME in \

@@ -16,7 +16,7 @@ LABEL release="${VERSION}-${REVISION}"
 COPY LICENSE /licenses/
 
 RUN dnf install -y \
-        python3-dnf-plugin-versionlock && \
+        python3-dnf-plugin-versionlock wget && \
     dnf versionlock add redhat-release* && \
     dnf clean all
 
@@ -49,7 +49,6 @@ RUN dnf update --nobest -y && dnf install --nobest --nodocs --allowerasing -y \
         clang \
         cmake3 \
         cpp \
-        ffmpeg-free \
         gcc-toolset-13 \
         git \
         glibc \
@@ -96,7 +95,7 @@ RUN wget https://bootstrap.pypa.io/get-pip.py && \
     python3 -m pip install --upgrade Jinja2 protobuf requests
 
 COPY install_efa.sh .
-RUN ./install_efa.sh && rm install_efa.sh && rm -rf /etc/ld.so.conf.d/efa.conf /etc/profile.d/efa.sh
+RUN ./install_efa.sh && rm -f install_efa.sh /etc/ld.so.conf.d/efa.conf /etc/profile.d/efa.sh
 
 ENV OPENMPI_VERSION=5.0.8
 ENV OPENMPI_SHA256=f891ddf2dab3b604f2521d0569615bc1c07a1ac86a295ac543e059aecb303621
@@ -108,7 +107,7 @@ ENV MPICC=${MPI_ROOT}/bin/mpicc
 ENV RDMAV_FORK_SAFE=1
 ENV OMPI_MCA_btl=^openib
 
-RUN wget -q -O /tmp/openmpi-${OPENMPI_VERSION}.tar.gz https://download.open-mpi.org/release/open-mpi/v5.0/openmpi-${OPENMPI_VERSION}.tar.gz && \
+RUN wget -O /tmp/openmpi-${OPENMPI_VERSION}.tar.gz https://download.open-mpi.org/release/open-mpi/v5.0/openmpi-${OPENMPI_VERSION}.tar.gz && \
     echo "${OPENMPI_SHA256} /tmp/openmpi-${OPENMPI_VERSION}.tar.gz" | sha256sum -c - && \
     tar -xzf /tmp/openmpi-${OPENMPI_VERSION}.tar.gz -C /tmp && \
     cd /tmp/openmpi-${OPENMPI_VERSION} && \
@@ -149,8 +148,6 @@ RUN dnf versionlock add \
             rdma-core \
             rdma-core-devel
 
-RUN python3 -m pip install habana_media_loader=="${VERSION}"."${REVISION}" --extra-index-url ${PYPI_URL}
-
 # SSH configuration necessary to support mpi-operator v2
 RUN mkdir -p /var/run/sshd && \
     sed -i 's/[ #]\(.*StrictHostKeyChecking \).*/ \1no/g' /etc/ssh/ssh_config && \
@@ -161,11 +158,15 @@ RUN mkdir -p /var/run/sshd && \
 
 RUN echo "source /opt/rh/gcc-toolset-13/enable" | tee -a ~/.bashrc
 
-# Wrapper to unset LD_PRELOAD before SSH
+# Wrapper to unset LD_PRELOAD for ssh and scp commands
 RUN echo '#!/bin/bash' > /usr/local/bin/ssh && \
     echo 'unset LD_PRELOAD' >> /usr/local/bin/ssh && \
     echo 'exec /usr/bin/ssh "$@"' >> /usr/local/bin/ssh && \
-    chmod +x /usr/local/bin/ssh
+    chmod +x /usr/local/bin/ssh && \
+    echo '#!/bin/bash' > /usr/local/bin/scp && \
+    echo 'unset LD_PRELOAD' >> /usr/local/bin/scp && \
+    echo 'exec /usr/bin/scp "$@"' >> /usr/local/bin/scp && \
+    chmod +x /usr/local/bin/scp
 
 ENV GC_KERNEL_PATH=/usr/lib/habanalabs/libtpc_kernels.so
 ENV HABANA_LOGS=/var/log/habana_logs/

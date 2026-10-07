@@ -38,27 +38,25 @@ RUN echo "deb https://${ARTIFACTORY_URL}/artifactory/debian jammy main" | tee -a
         habanalabs-thunk="$VERSION"-"$REVISION" \
         habanalabs-firmware-tools="$VERSION"-"$REVISION" \
         habanalabs-graph="$VERSION"-"$REVISION" && \
-    apt-get autoremove --yes && apt-get clean && rm -rf /var/lib/apt/lists/* && \
+    apt-get autoremove -y && rm -rf /var/lib/apt/lists/* && \
     sed --in-place "/$ARTIFACTORY_URL/d" /etc/apt/sources.list
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libjemalloc2 \
-    libcairo2-dev \
-    libglib2.0-dev \
-    libhdf5-dev \
-    libnuma-dev \
-    libpcre2-dev \
-    libjpeg-dev \
-    liblapack-dev \
-    libopenblas-dev \
-    numactl \
-    libgoogle-perftools-dev && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
+        libcairo2-dev \
+        libglib2.0-dev \
+        libgoogle-perftools-dev \
+        libhdf5-dev \
+        libjemalloc2 \
+        libjpeg-dev \
+        liblapack-dev \
+        libnuma-dev \
+        libopenblas-dev \
+        libpcre2-dev \
+        numactl && \
+    apt-get autoremove -y && rm -rf /var/lib/apt/lists/*
 
 RUN python3 -m pip install pip==24.2 --disable-pip-version-check && \
-    python3 -m pip install setuptools==75.1.0 --disable-pip-version-check && \
-    python3 -m pip install habana_media_loader=="${VERSION}"."${REVISION}" --extra-index-url ${PYPI_URL} --disable-pip-version-check
-
+    python3 -m pip install setuptools==75.1.0 --disable-pip-version-check
 RUN ln -s /usr/bin/python3.10 /usr/bin/python && wget --no-verbose "${PT_ARTIFACT_PATH}/${PT_PACKAGE_NAME}" && \
     mkdir -p /root/habanalabs/pytorch_temp && \
     tar -xf pytorch_modules-v"${PT_VERSION}"_"${VERSION}"_"${REVISION}".tgz -C ${PT_EXTRACT_PATH}/. && \

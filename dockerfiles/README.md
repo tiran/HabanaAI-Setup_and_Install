@@ -29,6 +29,7 @@ This folder contains Gaudi dockerfiles and makefiles that can be used to build H
 | ubuntu24.04        |       Yes      |       Yes      |               |
 | rhel9.6            |       Yes      |       Yes      |               |
 | rhel9.8            |       Yes      |       Yes      |               |
+| rhel10.2           |       Yes      |       Yes      |               |
 | tencentos3.1       |       Yes      |                |               |
 | tencentos3.1-conda |       Yes      |                |               |
 | navix9.4           |       Yes      |                |               |
@@ -77,13 +78,13 @@ This script can be used as reference to build docker images for Gaudi.
     make build BUILD_OS=ubuntu22.04 TORCH_TYPE=upstream
     ```
 
-    #### Build triton image (default OS - ubuntu22.04):
+    #### Build triton image (ubuntu22.04):
     ```
     cd triton
-    make build
+    make build BUILD_OS=ubuntu22.04
     ```
 
-    #### Build triton vllm backend (default OS - ubuntu22.04):
+    #### Build triton vllm backend (ubuntu22.04):
     ```
     cd triton_vllm_backend
     make build BUILD_OS=ubuntu22.04
@@ -92,7 +93,7 @@ This script can be used as reference to build docker images for Gaudi.
 3. Build command variables
 
     #### Optional Parameters
-    * BUILD_OS - set the OS to build (default ubuntu22.04)
+    * BUILD_OS - set the OS to build (default ubuntu24.04)
     * CUSTOM_PYTHON_VERSION - build OS with different python version than default - available ubuntu22.04 with python3.11
     * TORCH_TYPE - build pytorch docker with upstream or fork (internal) torch version (default fork)
     * BUILD_DIR - the folder where the build be executed from (default dockerbuild in image folder)

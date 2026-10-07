@@ -19,7 +19,7 @@ LABEL release="${VERSION}-${REVISION}"
 COPY LICENSE /licenses/
 
 RUN dnf install -y \
-        python3-dnf-plugin-versionlock && \
+        python3-dnf-plugin-versionlock wget && \
     dnf versionlock add navix-release* navix-repos* && \
     dnf clean all
 
@@ -33,7 +33,6 @@ RUN dnf update -y && dnf install -y \
         clang \
         cmake3 \
         cpp \
-        ffmpeg-free \
         gcc-toolset-13 \
         git \
         glibc \
@@ -94,7 +93,7 @@ ENV MPICC=${MPI_ROOT}/bin/mpicc
 ENV RDMAV_FORK_SAFE=1
 ENV OMPI_MCA_btl=^openib
 
-RUN wget -q -O /tmp/openmpi-${OPENMPI_VERSION}.tar.gz https://download.open-mpi.org/release/open-mpi/v5.0/openmpi-${OPENMPI_VERSION}.tar.gz && \
+RUN wget -O /tmp/openmpi-${OPENMPI_VERSION}.tar.gz https://download.open-mpi.org/release/open-mpi/v5.0/openmpi-${OPENMPI_VERSION}.tar.gz && \
     echo "${OPENMPI_SHA256} /tmp/openmpi-${OPENMPI_VERSION}.tar.gz" | sha256sum -c - && \
     tar -xzf /tmp/openmpi-${OPENMPI_VERSION}.tar.gz -C /tmp && \
     cd /tmp/openmpi-${OPENMPI_VERSION} && \
@@ -123,18 +122,9 @@ RUN dnf install -y \
 ENV RDMA_CORE_ROOT=/opt/habanalabs/rdma-core/src
 ENV RDMA_CORE_LIB=${RDMA_CORE_ROOT}/build/lib
 
-RUN wget -q -O /tmp/openmpi-${OPENMPI_VERSION}.tar.gz https://download.open-mpi.org/release/open-mpi/v5.0/openmpi-${OPENMPI_VERSION}.tar.gz && \
-    echo "${OPENMPI_SHA256} /tmp/openmpi-${OPENMPI_VERSION}.tar.gz" | sha256sum -c - && \
-    tar -xzf /tmp/openmpi-${OPENMPI_VERSION}.tar.gz -C /tmp && \
-    cd /tmp/openmpi-${OPENMPI_VERSION} && \
-    ./configure --prefix=${MPI_ROOT} --with-verbs && \
-    make -j$(nproc) && make install && cd / && rm -rf /tmp/openmpi-${OPENMPI_VERSION}.tar.gz /tmp/openmpi-${OPENMPI_VERSION}
-
 RUN ln -s /usr/bin/python3 /usr/bin/python
 
 RUN python3 -m pip install --upgrade protobuf
-
-RUN python3 -m pip install habana_media_loader=="${VERSION}"."${REVISION}" --extra-index-url ${PYPI_URL}
 
 # SSH configuration necessary to support mpi-operator v2
 RUN mkdir -p /var/run/sshd && \
@@ -146,10 +136,15 @@ RUN mkdir -p /var/run/sshd && \
 
 RUN echo "source /opt/rh/gcc-toolset-13/enable" | tee -a ~/.bashrc
 
+# Wrapper to unset LD_PRELOAD for ssh and scp commands
 RUN echo '#!/bin/bash' > /usr/local/bin/ssh && \
     echo 'unset LD_PRELOAD' >> /usr/local/bin/ssh && \
     echo 'exec /usr/bin/ssh "$@"' >> /usr/local/bin/ssh && \
-    chmod +x /usr/local/bin/ssh
+    chmod +x /usr/local/bin/ssh && \
+    echo '#!/bin/bash' > /usr/local/bin/scp && \
+    echo 'unset LD_PRELOAD' >> /usr/local/bin/scp && \
+    echo 'exec /usr/bin/scp "$@"' >> /usr/local/bin/scp && \
+    chmod +x /usr/local/bin/scp
 
 ENV GC_KERNEL_PATH=/usr/lib/habanalabs/libtpc_kernels.so
 ENV HABANA_LOGS=/var/log/habana_logs/

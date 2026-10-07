@@ -23,7 +23,7 @@ ENV PYTHONPATH=/root:/usr/lib/habanalabs/
 
 RUN dnf versionlock add openmpi* perftest*
 
-RUN dnf update -y && dnf install -y \
+RUN dnf install -y \
         cairo-devel \
         curl \
         gcc-toolset-11 \

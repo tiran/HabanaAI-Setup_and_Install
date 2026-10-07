@@ -28,7 +28,7 @@ case $ID in
                 rm -rf RPMS/ROCKYLINUX8/x86_64/rdma-core/rdma*
                 patch -f -p1 -i /tmp/aws_efa_installer.patch --reject-file=aws_efa_installer.patch.rej --no-backup-if-mismatch
                 tmp_dir_ofed=$(mktemp -d)
-                wget -O $tmp_dir_ofed/MLNX_OFED.tgz https://${ARTIFACTORY_URL}/artifactory/gaudi-installer/deps/MLNX_OFED_LINUX-5.8-3.0.7.0-rhel8.4-x86_64.tgz
+                wget -O $tmp_dir_ofed/MLNX_OFED.tgz "https://${ARTIFACTORY_URL}/artifactory/gaudi-installer/deps/MLNX_OFED_LINUX-5.8-3.0.7.0-rhel8.4-x86_64.tgz"
                 pushd $tmp_dir_ofed
                 tar -zxf MLNX_OFED.tgz
                 ofed_packages_path="mlnx-ofed"
@@ -51,7 +51,7 @@ eval $RUN_EFA_INSTALLER
 
 case $ID in
     ubuntu)
-        apt-get autoremove && rm -rf /var/lib/apt/lists/*
+        apt-get autoremove -y && rm -rf /var/lib/apt/lists/*
     ;;
 esac
 
